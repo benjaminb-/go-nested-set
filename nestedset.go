@@ -1,17 +1,10 @@
 package nestedset
 
 import (
-	"log"
+	"errors"
 
 	"github.com/google/uuid"
 )
-
-type Node struct {
-	Id       string
-	ParentId string
-	Left     int
-	Right    int
-}
 
 type NestedSet struct {
 	nodes []Node
@@ -25,33 +18,26 @@ func Build() NestedSet {
 	return ns
 }
 
-// Get the nested set root node
-func (ns *NestedSet) getRootNode() *Node {
-	var isRootFound bool
-	var rootNode Node
+// Get the root node
+func (ns *NestedSet) getRootNode() (*Node, error) {
 	for _, node := range ns.nodes {
-		if node.ParentId == uuid.Nil.String() {
-			isRootFound = true
-			rootNode = node
-			break
+		if node.isRoot() {
+			return &node, nil
 		}
 	}
-	if isRootFound == false {
-		log.Fatal("Root node not found")
-	}
-	return &rootNode
+	return nil, errors.New("Root node not found")
 }
 
+// Add a node
 func (ns *NestedSet) addNode(n Node, p *Node) *Node {
 
 	pRight := p.Right
 
-	n.setId(uuid.New().String())
-	n.setParentId(p.Id)
-
-	n.setLeft(p.Right)
-	n.setRight(p.Right + 1)
-	p.setRight(p.Right + 2)
+	n.setId()
+	n.ParentId = p.Id
+	n.Left = p.Right
+	n.Right = p.Right + 1
+	p.Right = p.Right + 2
 
 	for i, node := range ns.nodes {
 		if node.Right >= pRight {
@@ -68,26 +54,22 @@ func (ns *NestedSet) addNode(n Node, p *Node) *Node {
 	return &n
 }
 
-func (n *Node) setId(id string) {
-	n.Id = id
+// Move a node
+func (ns *NestedSet) moveNode(n Node) (*Node, error) {
+	// cannot move below ?
+	return &n, nil
 }
 
-func (n *Node) setParentId(id string) {
-	n.ParentId = id
+// Delete a node
+func (ns *NestedSet) deleteNode(n Node) (*Node, error) {
+	if n.isRoot() {
+		return nil, errors.New("Root node cannot be deleted")
+	}
+	return &n, nil
 }
 
-func (n *Node) setLeft(left int) {
-	n.Left = left
+func (ns *NestedSet) isValid() (bool, error) {
+	// build the full tree and check left right recursively
+	// use go routine if tree is heavy?
+	return true, nil
 }
-
-func (n *Node) setRight(right int) {
-	n.Right = right
-}
-
-// func (ns *NestedSet) updateNode(n node, parent int) node {
-// 	return n
-// }
-
-// func (ns *NestedSet) deleteNode(n node) node {
-// 	return n
-// }
