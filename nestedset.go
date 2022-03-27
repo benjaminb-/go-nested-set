@@ -55,17 +55,46 @@ func (ns *NestedSet) addNode(n Node, p *Node) *Node {
 }
 
 // Move a node
-func (ns *NestedSet) moveNode(n Node) (*Node, error) {
+func (ns *NestedSet) moveNode(n *Node) (*Node, error) {
 	// cannot move below ?
-	return &n, nil
+	return n, nil
 }
 
 // Delete a node
-func (ns *NestedSet) deleteNode(n Node) (*Node, error) {
+func (ns *NestedSet) deleteNode(n *Node) (*Node, error) {
 	if n.isRoot() {
 		return nil, errors.New("Root node cannot be deleted")
 	}
-	return &n, nil
+
+	dn, i := ns.findNodeById(n.Id)
+	if dn == nil {
+		return nil, errors.New("Node not found")
+	}
+
+	// delete the node in the slice with index
+	ns.nodes[i] = ns.nodes[len(ns.nodes)-1]
+	ns.nodes = ns.nodes[:len(ns.nodes)-1]
+
+	// TODO: wip
+	for i2, node := range ns.nodes {
+		if node.Right >= n.Right {
+			ns.nodes[i2].Right = ns.nodes[i2].Right - 2
+			if node.isRoot() == false {
+				ns.nodes[i2].Left = ns.nodes[i2].Left - 2
+			}
+		}
+	}
+
+	return n, nil
+}
+
+func (ns *NestedSet) findNodeById(id string) (*Node, int) {
+	for i, node := range ns.nodes {
+		if node.Id == id {
+			return &ns.nodes[i], i
+		}
+	}
+	return nil, 0
 }
 
 func (ns *NestedSet) isValid() (bool, error) {

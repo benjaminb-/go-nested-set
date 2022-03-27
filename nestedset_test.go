@@ -51,10 +51,31 @@ func TestNestedSetAddNodesToRootWithPresentNodes(t *testing.T) {
 	ns.addNode(Node{}, addedNode)
 	newRootNode, _ := ns.getRootNode()
 	lastNode := ns.addNode(Node{}, newRootNode)
-
 	assertInt(t, lastNode.Left, 5)
 	assertInt(t, lastNode.Right, 6)
 	newRootNode2, _ := ns.getRootNode()
 	assertInt(t, newRootNode2.Right, 7) // FIXME: have to get the root node again, need a way to modify the ref
+}
 
+func TestDeleteNode(t *testing.T) {
+	ns := Build()
+	rootNode, _ := ns.getRootNode()
+	_, error1 := ns.deleteNode(rootNode)
+	if error1 == nil {
+		t.Errorf("Delete node is not returning an error for root node")
+	}
+	addedNode := ns.addNode(Node{}, rootNode)
+	_, error2 := ns.deleteNode(addedNode)
+	if error2 != nil {
+		t.Errorf("Delete node is returning an error for a non root node")
+	}
+
+	if len(ns.nodes) != 1 {
+		t.Errorf("The nested set length should be 1 after deleting the added node, length is %v", len(ns.nodes))
+	}
+
+	rootNode2, _ := ns.getRootNode()
+	if rootNode2.Right != 1 {
+		t.Errorf("Remove node should update parent right, value is %v", rootNode2.Right)
+	}
 }
