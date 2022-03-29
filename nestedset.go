@@ -2,6 +2,8 @@ package nestedset
 
 import (
 	"errors"
+	"fmt"
+	"sort"
 
 	"github.com/google/uuid"
 )
@@ -18,18 +20,8 @@ func Build() NestedSet {
 	return ns
 }
 
-// Get the root node
-func (ns *NestedSet) getRootNode() (*Node, error) {
-	for _, node := range ns.nodes {
-		if node.isRoot() {
-			return &node, nil
-		}
-	}
-	return nil, errors.New("Root node not found")
-}
-
 // Add a node
-func (ns *NestedSet) addNode(n Node, p *Node) *Node {
+func (ns *NestedSet) addNode(n Node, p Node) *Node {
 
 	pRight := p.Right
 
@@ -42,10 +34,8 @@ func (ns *NestedSet) addNode(n Node, p *Node) *Node {
 	for i, node := range ns.nodes {
 		if node.Right >= pRight {
 			ns.nodes[i].Right = node.Right + 2
-			// node.setRight(node.Right + 2) // FIXME: this is not working need a way to modify the ref
 			if node.Left > pRight {
 				ns.nodes[i].Left = node.Left + 2
-				// node.setLeft(node.Left + 2) // FIXME: this is not working need a way to modify the ref
 			}
 		}
 	}
@@ -55,13 +45,16 @@ func (ns *NestedSet) addNode(n Node, p *Node) *Node {
 }
 
 // Move a node
-func (ns *NestedSet) moveNode(n *Node) (*Node, error) {
-	// cannot move below ?
-	return n, nil
+func (ns *NestedSet) moveNode(n Node, p *Node) (*Node, error) {
+	if n.isRoot() {
+		return nil, errors.New("Root node cannot be moved")
+	}
+
+	return &n, nil
 }
 
 // Delete a node
-func (ns *NestedSet) deleteNode(n *Node) (*Node, error) {
+func (ns *NestedSet) deleteNode(n Node) (*Node, error) {
 	if n.isRoot() {
 		return nil, errors.New("Root node cannot be deleted")
 	}
@@ -85,7 +78,7 @@ func (ns *NestedSet) deleteNode(n *Node) (*Node, error) {
 		}
 	}
 
-	return n, nil
+	return &n, nil
 }
 
 func (ns *NestedSet) findNodeById(id string) (*Node, int) {
@@ -101,4 +94,16 @@ func (ns *NestedSet) isValid() (bool, error) {
 	// build the full tree and check left right recursively
 	// use go routine if tree is heavy?
 	return true, nil
+}
+
+func (ns *NestedSet) reorder() {
+	sort.Slice(ns.nodes, func(i, j int) bool {
+		return ns.nodes[i].Left < ns.nodes[j].Left
+	})
+}
+
+func (ns *NestedSet) print() {
+	for _, node := range ns.nodes {
+		fmt.Println("Node", node.Left, node.Right)
+	}
 }

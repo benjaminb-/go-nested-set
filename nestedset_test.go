@@ -10,62 +10,80 @@ func assertInt(t *testing.T, value int, expect int) {
 	}
 }
 
-func TestNestedSetInitializeWithRootNode(t *testing.T) {
+func TestInitializeWithRootNode(t *testing.T) {
 	ns := Build()
 	if len(ns.nodes) != 1 {
 		t.Errorf("Nested set intialize should contains 1 node, total nodes is %v", len(ns.nodes))
 	}
-	rootNode, _ := ns.getRootNode()
-	assertInt(t, rootNode.Left, 0)
-	assertInt(t, rootNode.Right, 1)
+	assertInt(t, ns.nodes[0].Left, 0)
+	assertInt(t, ns.nodes[0].Right, 1)
 }
 
-func TestNestedSetAddNodesToRoot(t *testing.T) {
+func TestAddNodesToRoot(t *testing.T) {
 	ns := Build()
-	rootNode, _ := ns.getRootNode()
-	addedNode := ns.addNode(Node{}, rootNode)
-	assertInt(t, addedNode.Left, 1)
-	assertInt(t, addedNode.Right, 2)
-	assertInt(t, rootNode.Left, 0)
-	assertInt(t, rootNode.Right, 3)
+	ns.addNode(Node{}, ns.nodes[0])
+	assertInt(t, ns.nodes[1].Left, 1)
+	assertInt(t, ns.nodes[1].Right, 2)
+	assertInt(t, ns.nodes[0].Left, 0)
+	assertInt(t, ns.nodes[0].Right, 3)
 }
 
-func TestNestedSetAddNodesToLeafNode(t *testing.T) {
+func TestAddNodesToLeafNode(t *testing.T) {
 	ns := Build()
-	rootNode, _ := ns.getRootNode()
-	addedNode := ns.addNode(Node{}, rootNode)
-	otherAddedNode := ns.addNode(Node{}, addedNode)
-	assertInt(t, addedNode.Left, 1)
-	assertInt(t, addedNode.Right, 4)
-	assertInt(t, otherAddedNode.Left, 2)
-	assertInt(t, otherAddedNode.Right, 3)
-	newRootNode, _ := ns.getRootNode()
-	assertInt(t, newRootNode.Right, 5) // FIXME: have to get the root node again, need a way to modify the ref
+	ns.addNode(Node{}, ns.nodes[0])
+	ns.addNode(Node{}, ns.nodes[1])
+	assertInt(t, ns.nodes[1].Left, 1)
+	assertInt(t, ns.nodes[1].Right, 4)
+	assertInt(t, ns.nodes[2].Left, 2)
+	assertInt(t, ns.nodes[2].Right, 3)
+	assertInt(t, ns.nodes[0].Right, 5)
 
 }
 
-func TestNestedSetAddNodesToRootWithPresentNodes(t *testing.T) {
+func TestAddNodesToRootWithPresentNodes(t *testing.T) {
 	ns := Build()
-	rootNode, _ := ns.getRootNode()
-	addedNode := ns.addNode(Node{}, rootNode)
-	ns.addNode(Node{}, addedNode)
-	newRootNode, _ := ns.getRootNode()
-	lastNode := ns.addNode(Node{}, newRootNode)
-	assertInt(t, lastNode.Left, 5)
-	assertInt(t, lastNode.Right, 6)
-	newRootNode2, _ := ns.getRootNode()
-	assertInt(t, newRootNode2.Right, 7) // FIXME: have to get the root node again, need a way to modify the ref
+	ns.addNode(Node{}, ns.nodes[0])
+	ns.addNode(Node{}, ns.nodes[1])
+	ns.addNode(Node{}, ns.nodes[0])
+	assertInt(t, ns.nodes[3].Left, 5)
+	assertInt(t, ns.nodes[3].Right, 6)
+	assertInt(t, ns.nodes[0].Right, 7)
 }
 
-func TestDeleteNode(t *testing.T) {
+func TestAddMultipleNodesAtDifferentLevels(t *testing.T) {
 	ns := Build()
-	rootNode, _ := ns.getRootNode()
-	_, error1 := ns.deleteNode(rootNode)
+	ns.addNode(Node{}, ns.nodes[0])
+	ns.addNode(Node{}, ns.nodes[0])
+	ns.addNode(Node{}, ns.nodes[0])
+	ns.addNode(Node{}, ns.nodes[1])
+	ns.addNode(Node{}, ns.nodes[4])
+	ns.addNode(Node{}, ns.nodes[2])
+
+	assertInt(t, ns.nodes[0].Left, 0)
+	assertInt(t, ns.nodes[0].Right, 13)
+	assertInt(t, ns.nodes[1].Left, 1)
+	assertInt(t, ns.nodes[1].Right, 6)
+	assertInt(t, ns.nodes[4].Left, 2)
+	assertInt(t, ns.nodes[4].Right, 5)
+	assertInt(t, ns.nodes[5].Left, 3)
+	assertInt(t, ns.nodes[5].Right, 4)
+	assertInt(t, ns.nodes[2].Left, 7)
+	assertInt(t, ns.nodes[2].Right, 10)
+	assertInt(t, ns.nodes[6].Left, 8)
+	assertInt(t, ns.nodes[6].Right, 9)
+	assertInt(t, ns.nodes[3].Left, 11)
+	assertInt(t, ns.nodes[3].Right, 12)
+
+}
+
+func TestDeleteNodeOneLevelBelowRoot(t *testing.T) {
+	ns := Build()
+	_, error1 := ns.deleteNode(ns.nodes[0])
 	if error1 == nil {
 		t.Errorf("Delete node is not returning an error for root node")
 	}
-	addedNode := ns.addNode(Node{}, rootNode)
-	_, error2 := ns.deleteNode(addedNode)
+	ns.addNode(Node{}, ns.nodes[0])
+	_, error2 := ns.deleteNode(ns.nodes[1])
 	if error2 != nil {
 		t.Errorf("Delete node is returning an error for a non root node")
 	}
@@ -74,8 +92,5 @@ func TestDeleteNode(t *testing.T) {
 		t.Errorf("The nested set length should be 1 after deleting the added node, length is %v", len(ns.nodes))
 	}
 
-	rootNode2, _ := ns.getRootNode()
-	if rootNode2.Right != 1 {
-		t.Errorf("Remove node should update parent right, value is %v", rootNode2.Right)
-	}
+	assertInt(t, ns.nodes[0].Right, 1)
 }
