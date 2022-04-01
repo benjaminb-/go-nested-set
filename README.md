@@ -1,6 +1,8 @@
 ## Nested set model - Go implementation
 
-This package is to experiment with Go.
+This package is to experiment with Go. And it's a WIP.
+
+What is a nested set ? https://en.wikipedia.org/wiki/Nested_set_model
 
 TODO:
 
