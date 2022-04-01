@@ -32,6 +32,7 @@ func TestAddNodesToLeafNode(t *testing.T) {
 	ns := Build()
 	ns.addNode(Node{}, ns.nodes[0])
 	ns.addNode(Node{}, ns.nodes[1])
+
 	assertInt(t, ns.nodes[1].Left, 1)
 	assertInt(t, ns.nodes[1].Right, 4)
 	assertInt(t, ns.nodes[2].Left, 2)
@@ -45,6 +46,7 @@ func TestAddNodesToRootWithPresentNodes(t *testing.T) {
 	ns.addNode(Node{}, ns.nodes[0])
 	ns.addNode(Node{}, ns.nodes[1])
 	ns.addNode(Node{}, ns.nodes[0])
+
 	assertInt(t, ns.nodes[3].Left, 5)
 	assertInt(t, ns.nodes[3].Right, 6)
 	assertInt(t, ns.nodes[0].Right, 7)
@@ -93,4 +95,60 @@ func TestDeleteNodeOneLevelBelowRoot(t *testing.T) {
 	}
 
 	assertInt(t, ns.nodes[0].Right, 1)
+}
+
+func TestGetChildrenIndexes(t *testing.T) {
+	ns := Build()
+	if len(ns.getChildrenIndexes(&ns.nodes[0])) != 0 {
+		t.Errorf("Root node does not have any children, size is %v", len(ns.nodes))
+	}
+	ns.addNode(Node{}, ns.nodes[0])
+	if len(ns.getChildrenIndexes(&ns.nodes[0])) != 1 {
+		t.Errorf("Root node should have 1 child, size is %v", len(ns.nodes))
+	}
+	if len(ns.getChildrenIndexes(&ns.nodes[1])) != 0 {
+		t.Errorf("Child node should have 0 child, size is %v", len(ns.nodes))
+	}
+
+	ns.addNode(Node{}, ns.nodes[1])
+	ns.addNode(Node{}, ns.nodes[1])
+	ns.addNode(Node{}, ns.nodes[1])
+
+	if len(ns.getChildrenIndexes(&ns.nodes[1])) != 3 {
+		t.Errorf("Child node should have 3 children, size is %v", len(ns.nodes))
+	}
+}
+
+func TestDeleteMultiplesNodes(t *testing.T) {
+	ns := Build()
+
+	ns.addNode(Node{}, ns.nodes[0])
+	ns.addNode(Node{}, ns.nodes[1])
+	ns.deleteNode(ns.nodes[1])
+
+	assertInt(t, ns.nodes[1].Left, 1)
+	assertInt(t, ns.nodes[1].Right, 2)
+	assertInt(t, ns.nodes[0].Right, 3)
+
+	ns.addNode(Node{}, ns.nodes[1])
+	ns.addNode(Node{}, ns.nodes[1])
+	ns.addNode(Node{}, ns.nodes[1])
+	ns.addNode(Node{}, ns.nodes[4])
+	ns.addNode(Node{}, ns.nodes[4])
+
+	ns.deleteNode(ns.nodes[4])
+
+	assertInt(t, ns.nodes[1].Left, 1)
+
+}
+
+func TestMoveNode(t *testing.T) {
+	ns := Build()
+	ns.addNode(Node{}, ns.nodes[0])
+	ns.addNode(Node{}, ns.nodes[1])
+	ns.addNode(Node{}, ns.nodes[0])
+	ns.addNode(Node{}, ns.nodes[0])
+	ns.print()
+	ns.moveNode(ns.nodes[1], ns.nodes[0])
+	ns.print()
 }

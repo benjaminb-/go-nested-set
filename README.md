@@ -1,12 +1,11 @@
-# go-nested-set
+## Nested set model - Go implementation
+
+This package is to experiment with Go.
 
 TODO:
 
-- [x] check ref issues :
+- [] check ref issues :
   - use slice index to ensure i always have the right value, is it the right way?
-- [ ] implements other method
-  - fully unit tested
-- [x] split node in separate file
 - [ ] clean
 - [ ] readme
 - [ ] publish on go pkg
