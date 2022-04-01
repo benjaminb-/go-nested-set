@@ -1,6 +1,8 @@
 ## Nested set model - Go implementation
 
-This package is to experiment with Go.
+![workflow](https://github.com/benjaminb-/go-nested-set/actions/workflows/go.yml/badge.svg)
+
+This package is to experiment with Go with tree data structure.
 
 TODO:
 
