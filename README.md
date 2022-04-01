@@ -2,7 +2,7 @@
 
 ![workflow](https://github.com/benjaminb-/go-nested-set/actions/workflows/go.yml/badge.svg)
 
-This package is to experiment with Go with tree data structure.
+This package is to experiment with Go and a tree data structure.
 
 TODO:
 
